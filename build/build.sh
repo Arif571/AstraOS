@@ -3,12 +3,17 @@ set -e
 
 echo "⭐ AstraOS Build Starting..."
 
+# Install debian keyring dulu
+sudo apt-get install -y debian-archive-keyring
+
 mkdir -p output
 mkdir -p work
 cd work
 
 echo "🔧 Configuring..."
 lb config \
+  --mode debian \
+  --system live \
   --distribution bookworm \
   --binary-images iso-hybrid \
   --archive-areas "main contrib non-free non-free-firmware" \
@@ -17,6 +22,7 @@ lb config \
   --mirror-chroot-security "http://security.debian.org/debian-security/" \
   --mirror-binary "http://deb.debian.org/debian/" \
   --mirror-binary-security "http://security.debian.org/debian-security/" \
+  --keyring-packages "debian-archive-keyring" \
   --bootappend-live "boot=live components quiet splash" \
   --iso-volume "AstraOS"
 
