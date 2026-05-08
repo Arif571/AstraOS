@@ -1,0 +1,20 @@
+# AstraOS ShieldMode Packages
+nmap
+wireshark
+aircrack-ng
+metasploit-framework
+tor
+torbrowser-launcher
+ufw
+fail2ban
+clamav
+rkhunter
+tcpdump
+netcat-openbsd
+john
+hashcat
+sqlmap
+burpsuite
+proxychains4
+openvpn
+wireguard

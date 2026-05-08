@@ -1,0 +1,43 @@
+#!/bin/bash
+# AstraOS Profile Switcher
+# Usage: astra switch --mode <devmode|shieldmode|desktopmode|labmode>
+
+ASTRA_VERSION="0.1.0"
+PROFILES_DIR="/etc/astraos/profiles"
+
+print_banner() {
+echo "⭐ AstraOS v$ASTRA_VERSION"
+echo "As high as stars, illuminating all users"
+echo "==========================================="
+}
+
+switch_mode() {
+    local mode=$1
+    echo "🔄 Switching to $mode..."
+    case $mode in
+        devmode|shieldmode|desktopmode|labmode)
+            sudo apt-get install -y $(cat $PROFILES_DIR/$mode/packages.list | grep -v '^#' | tr '\n' ' ')
+            echo "✅ Switched to $mode successfully!"
+            ;;
+        *)
+            echo "❌ Unknown mode: $mode"
+            echo "Available modes: devmode, shieldmode, desktopmode, labmode"
+            exit 1
+            ;;
+    esac
+}
+
+print_banner
+case $1 in
+    switch)
+        if [ "$2" == "--mode" ]; then
+            switch_mode $3
+        fi
+        ;;
+    --version|-v)
+        echo "Version: $ASTRA_VERSION"
+        ;;
+    *)
+        echo "Usage: astra switch --mode <mode>"
+        ;;
+esac
