@@ -12,10 +12,13 @@ lb config \
   --distribution bookworm \
   --binary-images iso-hybrid \
   --archive-areas "main contrib non-free non-free-firmware" \
+  --mirror-bootstrap "http://deb.debian.org/debian/" \
+  --mirror-binary "http://deb.debian.org/debian/" \
+  --mirror-binary-security "http://security.debian.org/debian-security/" \
   --bootappend-live "boot=live components quiet splash" \
   --iso-volume "AstraOS"
 
-echo "🏗️ Building ISO (ini butuh 15-25 menit)..."
+echo "🏗️ Building ISO..."
 lb build
 
 echo "📦 Collecting ISO..."
