@@ -7,7 +7,7 @@ mkdir -p output
 mkdir -p work
 cd work
 
-echo "🔧 Configuring live-build..."
+echo "🔧 Configuring..."
 lb config \
   --distribution bookworm \
   --binary-images iso-hybrid \
@@ -15,11 +15,14 @@ lb config \
   --bootappend-live "boot=live components quiet splash" \
   --iso-volume "AstraOS"
 
-echo "🏗️ Building..."
-lb build 2>&1 | tee ../output/build.log
+echo "🏗️ Building ISO (ini butuh 15-25 menit)..."
+lb build
 
 echo "📦 Collecting ISO..."
-find . -name "*.iso" -exec cp {} ../output/ \;
+find . -name "*.iso" | while read f; do
+  echo "Found: $f"
+  cp "$f" ../output/
+done
 
-echo "✅ Build complete!"
+echo "✅ Done!"
 ls -lh ../output/
