@@ -1,31 +1,25 @@
 #!/bin/bash
-# AstraOS ISO Build Script
 set -e
 
-echo "⭐ Building AstraOS ISO..."
-echo "📋 System info:"
-uname -a
-lsb_release -a 2>/dev/null || true
+echo "⭐ AstraOS Build Starting..."
 
 mkdir -p output
-mkdir -p work/lb
-cd work/lb
+mkdir -p work
+cd work
 
 echo "🔧 Configuring live-build..."
 lb config \
   --distribution bookworm \
+  --binary-images iso-hybrid \
   --archive-areas "main contrib non-free non-free-firmware" \
   --bootappend-live "boot=live components quiet splash" \
-  --iso-volume "AstraOS" \
-  --image-name "astraos" \
-  --apt-indices false \
-  --apt-recommends false
+  --iso-volume "AstraOS"
 
-echo "🏗️ Starting build..."
-sudo lb build 2>&1 | tee ../../output/build.log
+echo "🏗️ Building..."
+lb build 2>&1 | tee ../output/build.log
 
-echo "📦 Copying ISO..."
-find . -name "*.iso" -exec cp {} ../../output/ \;
+echo "📦 Collecting ISO..."
+find . -name "*.iso" -exec cp {} ../output/ \;
 
 echo "✅ Build complete!"
-ls -lh ../../output/
+ls -lh ../output/
