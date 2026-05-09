@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "⭐ AstraOS Build Starting..."
+echo "⭐ AstraOS Build Starting — v1.1.0..."
 
 mkdir -p output
 WORK=$(mktemp -d)
@@ -26,24 +26,24 @@ sudo debootstrap \
   "$ROOTFS" \
   http://deb.debian.org/debian/
 
-echo "⚙️ Configuring base system..."
-sudo chroot "$ROOTFS" /bin/bash -c "
-  # Setup apt sources
-  cat > /etc/apt/sources.list << 'SOURCES'
+echo "⚙️ Configuring apt sources..."
+sudo tee "$ROOTFS/etc/apt/sources.list" << 'SOURCES'
 deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
 deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
 deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
 SOURCES
 
+echo "🔧 Installing base system..."
+sudo chroot "$ROOTFS" /bin/bash -c "
   apt-get update
-  
-  # Install base packages
+
+  # Base system
   apt-get install -y --no-install-recommends \
     linux-image-amd64 \
+    linux-headers-amd64 \
     live-boot \
     systemd \
     systemd-sysv \
-    network-manager \
     sudo \
     bash \
     curl \
@@ -55,17 +55,127 @@ SOURCES
     ca-certificates \
     locales \
     keyboard-configuration \
-    console-setup
+    console-setup \
+    network-manager \
+    firmware-linux \
+    firmware-linux-nonfree \
+    parted \
+    grub-efi-amd64 \
+    grub-pc
 
-  # Install KDE Plasma
+  echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+  locale-gen
+"
+
+echo "🖥️ Installing KDE Plasma Desktop..."
+sudo chroot "$ROOTFS" /bin/bash -c "
   apt-get install -y \
     kde-plasma-desktop \
     sddm \
-    firefox-esr \
     konsole \
-    dolphin
+    dolphin \
+    firefox-esr \
+    ark \
+    kate \
+    gwenview \
+    spectacle \
+    okular \
+    kcalc \
+    plasma-nm \
+    plasma-pa \
+    powerdevil \
+    bluedevil \
+    print-manager \
+    packagekit \
+    apt-transport-https
+"
 
-  apt-get clean
+echo "🧑‍💻 Installing DevMode tools..."
+sudo chroot "$ROOTFS" /bin/bash -c "
+  apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    make \
+    cmake \
+    python3 \
+    python3-pip \
+    python3-venv \
+    nodejs \
+    npm \
+    golang \
+    rustc \
+    cargo \
+    git \
+    vim \
+    neovim \
+    tmux \
+    zsh \
+    docker.io \
+    code-oss \
+    gdb \
+    valgrind \
+    strace \
+    ltrace
+"
+
+echo "🛡️ Installing ShieldMode tools..."
+sudo chroot "$ROOTFS" /bin/bash -c "
+  apt-get install -y \
+    nmap \
+    wireshark \
+    tcpdump \
+    netcat-openbsd \
+    tor \
+    torbrowser-launcher \
+    ufw \
+    fail2ban \
+    clamav \
+    rkhunter \
+    aircrack-ng \
+    john \
+    hashcat \
+    sqlmap \
+    proxychains4 \
+    openvpn \
+    wireguard \
+    macchanger \
+    net-tools \
+    whois \
+    dnsutils \
+    hydra \
+    nikto
+"
+
+echo "🔬 Installing LabMode tools..."
+sudo chroot "$ROOTFS" /bin/bash -c "
+  apt-get install -y \
+    python3-numpy \
+    python3-pandas \
+    python3-matplotlib \
+    python3-scikit-learn \
+    python3-scipy \
+    python3-seaborn \
+    jupyter-notebook \
+    r-base \
+    octave \
+    gnuplot \
+    sqlite3 \
+    postgresql \
+    python3-sqlalchemy \
+    python3-requests \
+    python3-beautifulsoup4 \
+    python3-tensorflow \
+    python3-keras
+"
+
+echo "🎨 Installing GUI Installer (Calamares)..."
+sudo chroot "$ROOTFS" /bin/bash -c "
+  apt-get install -y \
+    calamares \
+    calamares-settings-debian 2>/dev/null || \
+  apt-get install -y calamares || \
+  echo 'Calamares not available, skipping...'
 "
 
 echo "🎨 Applying AstraOS branding..."
@@ -73,9 +183,13 @@ echo "🎨 Applying AstraOS branding..."
 # Copy MOTD
 sudo cp branding/motd/motd "$ROOTFS/etc/motd"
 
-# Copy astra switcher script
+# Copy astra switcher
 sudo cp scripts/astra "$ROOTFS/usr/local/bin/astra"
 sudo chmod +x "$ROOTFS/usr/local/bin/astra"
+
+# Copy astra-install
+sudo cp scripts/astra-install "$ROOTFS/usr/local/bin/astra-install"
+sudo chmod +x "$ROOTFS/usr/local/bin/astra-install"
 
 # Copy profile configs
 sudo mkdir -p "$ROOTFS/etc/astraos/profiles"
@@ -84,9 +198,9 @@ sudo cp -r profiles/* "$ROOTFS/etc/astraos/profiles/"
 # Set hostname
 echo "astraos" | sudo tee "$ROOTFS/etc/hostname"
 
-# Create default user 'astra'
+# Create default user
 sudo chroot "$ROOTFS" /bin/bash -c "
-  useradd -m -s /bin/bash -G sudo astra
+  useradd -m -s /bin/bash -G sudo,audio,video,plugdev astra 2>/dev/null || true
   echo 'astra:astra' | chpasswd
   echo 'root:root' | chpasswd
 "
@@ -94,15 +208,22 @@ sudo chroot "$ROOTFS" /bin/bash -c "
 # Set OS info
 sudo tee "$ROOTFS/etc/os-release" << 'OSREL'
 NAME="AstraOS"
-VERSION="1.0.0 (Nova)"
+VERSION="1.1.0 (Nova)"
 ID=astraos
 ID_LIKE=debian
-PRETTY_NAME="AstraOS 1.0.0 (Nova)"
-VERSION_ID="1.0"
+PRETTY_NAME="AstraOS 1.1.0 (Nova)"
+VERSION_ID="1.1"
 HOME_URL="https://github.com/Arif571/AstraOS"
 SUPPORT_URL="https://github.com/Arif571/AstraOS/issues"
 BUG_REPORT_URL="https://github.com/Arif571/AstraOS/issues"
 OSREL
+
+# Enable services
+sudo chroot "$ROOTFS" /bin/bash -c "
+  systemctl enable NetworkManager 2>/dev/null || true
+  systemctl enable sddm 2>/dev/null || true
+  systemctl enable ufw 2>/dev/null || true
+"
 
 echo "🗜️ Creating squashfs..."
 mkdir -p "$WORK/iso/live"
@@ -129,18 +250,23 @@ terminal_output gfxterm
 set color_normal=light-cyan/black
 set color_highlight=black/light-cyan
 
-menuentry "⭐ AstraOS Live — Try without installing" {
+menuentry "⭐ AstraOS Live — DesktopMode" {
   linux /boot/vmlinuz boot=live quiet splash
   initrd /boot/initrd.img
 }
 
-menuentry "⭐ AstraOS Live — DevMode" {
+menuentry "🧑‍💻 AstraOS Live — DevMode" {
   linux /boot/vmlinuz boot=live quiet splash astra.mode=devmode
   initrd /boot/initrd.img
 }
 
-menuentry "⭐ AstraOS Live — ShieldMode" {
+menuentry "🛡️ AstraOS Live — ShieldMode" {
   linux /boot/vmlinuz boot=live quiet splash astra.mode=shieldmode
+  initrd /boot/initrd.img
+}
+
+menuentry "🔬 AstraOS Live — LabMode" {
+  linux /boot/vmlinuz boot=live quiet splash astra.mode=labmode
   initrd /boot/initrd.img
 }
 
@@ -154,6 +280,6 @@ echo "💿 Creating ISO..."
 sudo grub-mkrescue -o output/astraos.iso "$WORK/iso" \
   --compress=xz
 
-echo "✅ AstraOS ISO Build Complete!"
+echo "✅ AstraOS v1.1.0 Build Complete!"
 ls -lh output/
 sudo rm -rf "$WORK"
