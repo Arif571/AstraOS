@@ -37,7 +37,7 @@ echo "🔧 Installing base system..."
 sudo chroot "$ROOTFS" /bin/bash -c "
   apt-get update
 
-  # Base system
+  # Base system (tanpa grub-efi & grub-pc — konflik!)
   apt-get install -y --no-install-recommends \
     linux-image-amd64 \
     linux-headers-amd64 \
@@ -59,11 +59,11 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     network-manager \
     firmware-linux \
     firmware-linux-nonfree \
-    parted \
-    grub-efi-amd64 \
-    grub-pc
+    parted
 
+  # Fix locale
   echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+  apt-get install -y locales
   locale-gen
 "
 
@@ -85,7 +85,6 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     plasma-pa \
     powerdevil \
     bluedevil \
-    print-manager \
     packagekit \
     apt-transport-https
 "
@@ -106,17 +105,13 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     golang \
     rustc \
     cargo \
-    git \
-    vim \
     neovim \
     tmux \
     zsh \
     docker.io \
-    code-oss \
     gdb \
     valgrind \
-    strace \
-    ltrace
+    strace
 "
 
 echo "🛡️ Installing ShieldMode tools..."
@@ -127,7 +122,6 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     tcpdump \
     netcat-openbsd \
     tor \
-    torbrowser-launcher \
     ufw \
     fail2ban \
     clamav \
@@ -164,48 +158,33 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     postgresql \
     python3-sqlalchemy \
     python3-requests \
-    python3-beautifulsoup4 \
-    python3-tensorflow \
-    python3-keras
+    python3-beautifulsoup4
 "
 
-echo "🎨 Installing GUI Installer (Calamares)..."
+echo "🎨 Installing Calamares GUI Installer..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y \
-    calamares \
-    calamares-settings-debian 2>/dev/null || \
-  apt-get install -y calamares || \
-  echo 'Calamares not available, skipping...'
+  apt-get install -y calamares 2>/dev/null || echo 'Calamares skipped'
 "
 
 echo "🎨 Applying AstraOS branding..."
-
-# Copy MOTD
 sudo cp branding/motd/motd "$ROOTFS/etc/motd"
-
-# Copy astra switcher
 sudo cp scripts/astra "$ROOTFS/usr/local/bin/astra"
 sudo chmod +x "$ROOTFS/usr/local/bin/astra"
-
-# Copy astra-install
 sudo cp scripts/astra-install "$ROOTFS/usr/local/bin/astra-install"
 sudo chmod +x "$ROOTFS/usr/local/bin/astra-install"
-
-# Copy profile configs
 sudo mkdir -p "$ROOTFS/etc/astraos/profiles"
 sudo cp -r profiles/* "$ROOTFS/etc/astraos/profiles/"
-
-# Set hostname
 echo "astraos" | sudo tee "$ROOTFS/etc/hostname"
 
-# Create default user
 sudo chroot "$ROOTFS" /bin/bash -c "
   useradd -m -s /bin/bash -G sudo,audio,video,plugdev astra 2>/dev/null || true
   echo 'astra:astra' | chpasswd
   echo 'root:root' | chpasswd
+  systemctl enable NetworkManager 2>/dev/null || true
+  systemctl enable sddm 2>/dev/null || true
+  systemctl enable ufw 2>/dev/null || true
 "
 
-# Set OS info
 sudo tee "$ROOTFS/etc/os-release" << 'OSREL'
 NAME="AstraOS"
 VERSION="1.1.0 (Nova)"
@@ -217,13 +196,6 @@ HOME_URL="https://github.com/Arif571/AstraOS"
 SUPPORT_URL="https://github.com/Arif571/AstraOS/issues"
 BUG_REPORT_URL="https://github.com/Arif571/AstraOS/issues"
 OSREL
-
-# Enable services
-sudo chroot "$ROOTFS" /bin/bash -c "
-  systemctl enable NetworkManager 2>/dev/null || true
-  systemctl enable sddm 2>/dev/null || true
-  systemctl enable ufw 2>/dev/null || true
-"
 
 echo "🗜️ Creating squashfs..."
 mkdir -p "$WORK/iso/live"
