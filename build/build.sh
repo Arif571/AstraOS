@@ -78,7 +78,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     ark \
     kate \
     gwenview \
-    spectacle \
+    kde-spectacle \
     okular \
     kcalc \
     plasma-nm \
