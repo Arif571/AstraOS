@@ -141,7 +141,11 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     nikto
 "
 
-echo "🔬 Installing LabMode tools..."
+echo "🔬 Installing LabMode tools...
+
+  # Fix dpkg java issue
+  dpkg --configure -a 2>/dev/null || true
+  apt-get install -f -y 2>/dev/null || true"
 sudo chroot "$ROOTFS" /bin/bash -c "
   apt-get install -y --ignore-missing \
     python3-numpy \
@@ -150,9 +154,6 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     python3-sklearn \
     python3-scipy \
     python3-seaborn \
-    jupyter-notebook \
-    r-base \
-    octave \
     gnuplot \
     sqlite3 \
     postgresql \
