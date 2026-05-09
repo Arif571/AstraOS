@@ -8,7 +8,7 @@ WORK=$(mktemp -d)
 ROOTFS="$WORK/rootfs"
 
 echo "📦 Installing build tools..."
-sudo apt-get install -y \
+sudo apt-get install -y --ignore-missing \
   debootstrap \
   squashfs-tools \
   xorriso \
@@ -38,7 +38,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
   apt-get update
 
   # Base system (tanpa grub-efi & grub-pc — konflik!)
-  apt-get install -y --no-install-recommends \
+  apt-get install -y --no-install-recommends --ignore-missing \
     linux-image-amd64 \
     linux-headers-amd64 \
     live-boot \
@@ -69,7 +69,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
 
 echo "🖥️ Installing KDE Plasma Desktop..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y \
+  apt-get install -y --ignore-missing \
     kde-plasma-desktop \
     sddm \
     konsole \
@@ -91,7 +91,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
 
 echo "🧑‍💻 Installing DevMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y \
+  apt-get install -y --ignore-missing \
     build-essential \
     gcc \
     g++ \
@@ -116,7 +116,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
 
 echo "🛡️ Installing ShieldMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y \
+  apt-get install -y --ignore-missing \
     nmap \
     wireshark \
     tcpdump \
@@ -143,7 +143,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
 
 echo "🔬 Installing LabMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y \
+  apt-get install -y --ignore-missing \
     python3-numpy \
     python3-pandas \
     python3-matplotlib \
