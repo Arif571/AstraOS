@@ -147,7 +147,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     python3-numpy \
     python3-pandas \
     python3-matplotlib \
-    python3-scikit-learn \
+    python3-sklearn \
     python3-scipy \
     python3-seaborn \
     jupyter-notebook \
@@ -158,7 +158,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     postgresql \
     python3-sqlalchemy \
     python3-requests \
-    python3-beautifulsoup4
+    python3-bs4
 "
 
 echo "🎨 Installing Calamares GUI Installer..."
