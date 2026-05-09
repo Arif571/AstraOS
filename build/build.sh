@@ -118,7 +118,6 @@ echo "🛡️ Installing ShieldMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
   apt-get install -y --ignore-missing \
     nmap \
-    wireshark \
     tcpdump \
     netcat-openbsd \
     tor \
@@ -126,9 +125,7 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     fail2ban \
     clamav \
     rkhunter \
-    aircrack-ng \
     john \
-    hashcat \
     sqlmap \
     proxychains4 \
     openvpn \
@@ -156,7 +153,6 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     python3-seaborn \
     gnuplot \
     sqlite3 \
-    postgresql \
     python3-sqlalchemy \
     python3-requests \
     python3-bs4
@@ -250,7 +246,7 @@ menuentry "🔧 AstraOS — Safe Mode" {
 GRUB
 
 echo "💿 Creating ISO..."
-sudo grub-mkrescue -o output/astraos.iso "$WORK/iso" \
+sudo xorriso -as mkisofs -r -V "AstraOS" -cache-inodes -J -l -b boot/grub/i386-pc/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot boot/grub/efi.img -efi-boot-part --efi-startup-code --protective-msdos-label -o output/astraos.iso "$WORK/iso" \
   --compress=xz
 
 echo "✅ AstraOS v1.1.0 Build Complete!"
