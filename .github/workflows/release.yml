@@ -1,0 +1,66 @@
+name: Release AstraOS
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            debootstrap \
+            squashfs-tools \
+            xorriso \
+            grub-pc-bin \
+            grub-efi-amd64-bin \
+            mtools \
+            isolinux \
+            syslinux-common
+
+      - name: Build AstraOS ISO
+        run: |
+          chmod +x build/build.sh
+          sudo bash build/build.sh
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "⭐ AstraOS ${{ github.ref_name }}"
+          body: |
+            ## ⭐ AstraOS ${{ github.ref_name }}
+            
+            > *As high as stars, illuminating all users*
+            
+            ### 🆕 What's included
+            - 🖥️ KDE Plasma Desktop
+            - 🧑‍💻 DevMode — Development tools
+            - 🛡️ ShieldMode — Security tools  
+            - 🔬 LabMode — Data science tools
+            - ⚡ `astra switch --mode <name>` command
+            
+            ### 💾 Installation
+            1. Download `astraos.iso`
+            2. Flash to USB: `dd if=astraos.iso of=/dev/sdX bs=4M`
+            3. Boot from USB
+            4. Run `sudo astra-install`
+            
+            ### 🔑 Default credentials (Live mode)
+            - Username: `astra`
+            - Password: `astra`
+          files: output/astraos.iso
+          draft: false
+          prerelease: false
