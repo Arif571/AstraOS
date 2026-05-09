@@ -246,7 +246,7 @@ menuentry "🔧 AstraOS — Safe Mode" {
 GRUB
 
 echo "💿 Creating ISO..."
-sudo xorriso -as mkisofs -r -V "AstraOS" -cache-inodes -J -l -b boot/grub/i386-pc/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot boot/grub/efi.img -efi-boot-part --efi-startup-code --protective-msdos-label -o output/astraos.iso "$WORK/iso" \
+sudo grub-mkrescue --compress=none -o output/astraos.iso "$WORK/iso"
   --compress=xz
 
 echo "✅ AstraOS v1.1.0 Build Complete!"
