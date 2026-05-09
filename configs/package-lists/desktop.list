@@ -1,0 +1,11 @@
+# AstraOS Desktop Packages
+task-kde-desktop
+firefox-esr
+network-manager
+network-manager-kde
+sudo
+curl
+wget
+git
+htop
+neofetch

@@ -1,0 +1,33 @@
+# AstraOS GRUB Theme
+title-text: "⭐ AstraOS — As high as stars"
+title-font: "Sans Bold 20"
+title-color: "#00d4ff"
+desktop-color: "#0a0a1a"
+desktop-image: "background.png"
+
++ boot_menu {
+  left = 25%
+  top = 35%
+  width = 50%
+  height = 40%
+  item-font: "Sans Regular 14"
+  item-color: "#ffffff"
+  selected-item-color: "#00d4ff"
+  selected-item-pixmap-style: "select_*"
+  item-height = 40
+  item-padding = 10
+  item-spacing = 5
+}
+
++ progress_bar {
+  id = "__timeout__"
+  left = 25%
+  top = 80%
+  width = 50%
+  height = 12
+  fg-color = "#00d4ff"
+  bg-color = "#1a1a2e"
+  border-color = "#00d4ff"
+  text-color = "#ffffff"
+  font = "Sans Regular 12"
+}
