@@ -8,15 +8,13 @@ WORK=$(mktemp -d)
 ROOTFS="$WORK/rootfs"
 
 echo "📦 Installing build tools..."
-sudo apt-get install -y --ignore-missing \
+sudo apt-get install -y \
   debootstrap \
   squashfs-tools \
   xorriso \
   grub-pc-bin \
   grub-efi-amd64-bin \
-  mtools \
-  isolinux \
-  syslinux-common
+  mtools
 
 echo "🌍 Bootstrapping Debian bookworm..."
 sudo debootstrap \
@@ -35,12 +33,10 @@ SOURCES
 
 echo "🔧 Installing base system..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get update
+  apt-get update -qq
 
-  # Base system (tanpa grub-efi & grub-pc — konflik!)
-  apt-get install -y --no-install-recommends --ignore-missing \
+  apt-get install -y --no-install-recommends \
     linux-image-amd64 \
-    linux-headers-amd64 \
     live-boot \
     systemd \
     systemd-sysv \
@@ -54,49 +50,34 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     htop \
     ca-certificates \
     locales \
-    keyboard-configuration \
-    console-setup \
     network-manager \
-    firmware-linux \
-    firmware-linux-nonfree \
-    parted
+    parted \
+    firmware-linux-free
 
-  # Fix locale
   echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
   apt-get install -y locales
   locale-gen
 "
 
-echo "🖥️ Installing KDE Plasma Desktop..."
+echo "🖥️ Installing KDE Plasma..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y --ignore-missing \
+  apt-get install -y --no-install-recommends \
     kde-plasma-desktop \
     sddm \
     konsole \
     dolphin \
     firefox-esr \
-    ark \
     kate \
-    gwenview \
-    kde-spectacle \
-    okular \
     kcalc \
     plasma-nm \
     plasma-pa \
-    powerdevil \
-    bluedevil \
-    packagekit \
     apt-transport-https
 "
 
 echo "🧑‍💻 Installing DevMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y --ignore-missing \
+  apt-get install -y --no-install-recommends \
     build-essential \
-    gcc \
-    g++ \
-    make \
-    cmake \
     python3 \
     python3-pip \
     python3-venv \
@@ -108,15 +89,12 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     neovim \
     tmux \
     zsh \
-    docker.io \
-    gdb \
-    valgrind \
-    strace
+    gdb
 "
 
 echo "🛡️ Installing ShieldMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y --ignore-missing \
+  apt-get install -y --no-install-recommends \
     nmap \
     tcpdump \
     netcat-openbsd \
@@ -124,43 +102,24 @@ sudo chroot "$ROOTFS" /bin/bash -c "
     ufw \
     fail2ban \
     clamav \
-    rkhunter \
-    john \
-    sqlmap \
     proxychains4 \
     openvpn \
-    wireguard \
-    macchanger \
     net-tools \
     whois \
-    dnsutils \
-    hydra \
-    nikto
+    dnsutils
 "
 
-echo "🔬 Installing LabMode tools...
-
-  # Fix dpkg java issue
-  dpkg --configure -a 2>/dev/null || true
-  apt-get install -f -y 2>/dev/null || true"
+echo "🔬 Installing LabMode tools..."
 sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y --ignore-missing \
+  apt-get install -y --no-install-recommends \
     python3-numpy \
     python3-pandas \
     python3-matplotlib \
     python3-sklearn \
     python3-scipy \
     python3-seaborn \
-    gnuplot \
     sqlite3 \
-    python3-sqlalchemy \
-    python3-requests \
-    python3-bs4
-"
-
-echo "🎨 Installing Calamares GUI Installer..."
-sudo chroot "$ROOTFS" /bin/bash -c "
-  apt-get install -y calamares 2>/dev/null || echo 'Calamares skipped'
+    gnuplot
 "
 
 echo "🎨 Applying AstraOS branding..."
@@ -174,12 +133,11 @@ sudo cp -r profiles/* "$ROOTFS/etc/astraos/profiles/"
 echo "astraos" | sudo tee "$ROOTFS/etc/hostname"
 
 sudo chroot "$ROOTFS" /bin/bash -c "
-  useradd -m -s /bin/bash -G sudo,audio,video,plugdev astra 2>/dev/null || true
+  useradd -m -s /bin/bash -G sudo,audio,video astra 2>/dev/null || true
   echo 'astra:astra' | chpasswd
   echo 'root:root' | chpasswd
   systemctl enable NetworkManager 2>/dev/null || true
   systemctl enable sddm 2>/dev/null || true
-  systemctl enable ufw 2>/dev/null || true
 "
 
 sudo tee "$ROOTFS/etc/os-release" << 'OSREL'
@@ -194,16 +152,44 @@ SUPPORT_URL="https://github.com/Arif571/AstraOS/issues"
 BUG_REPORT_URL="https://github.com/Arif571/AstraOS/issues"
 OSREL
 
+echo "🧹 Cleaning up to reduce size..."
+sudo chroot "$ROOTFS" /bin/bash -c "
+  apt-get clean
+  apt-get autoremove -y
+  rm -rf /var/cache/apt/*
+  rm -rf /var/lib/apt/lists/*
+  rm -rf /tmp/*
+  rm -rf /usr/share/doc/*
+  rm -rf /usr/share/man/*
+  rm -rf /usr/share/locale/*
+  find /var/log -type f -delete
+"
+
 echo "🗜️ Creating squashfs..."
 mkdir -p "$WORK/iso/live"
 mkdir -p "$WORK/iso/boot/grub"
 
 sudo mksquashfs "$ROOTFS" "$WORK/iso/live/filesystem.squashfs" \
-  -comp xz -e boot
+  -comp xz \
+  -Xbcj x86 \
+  -b 1048576 \
+  -e boot
+
+SQFS_SIZE=$(du -b "$WORK/iso/live/filesystem.squashfs" | cut -f1)
+echo "📊 Squashfs size: $(du -sh $WORK/iso/live/filesystem.squashfs | cut -f1)"
+
+if [ "$SQFS_SIZE" -gt 4000000000 ]; then
+  echo "⚠️ ISO too large, cleaning more..."
+  sudo rm -rf "$ROOTFS/usr/share/locale"
+  sudo rm -rf "$ROOTFS/usr/lib/debug"
+  sudo rm -rf "$ROOTFS/usr/lib/x86_64-linux-gnu/dri"
+  sudo mksquashfs "$ROOTFS" "$WORK/iso/live/filesystem.squashfs" \
+    -comp xz -Xbcj x86 -b 1048576 -e boot -noappend
+fi
 
 echo "🥾 Setting up kernel & initrd..."
-KERNEL=$(ls "$ROOTFS/boot/vmlinuz-"* | head -1)
-INITRD=$(ls "$ROOTFS/boot/initrd.img-"* | head -1)
+KERNEL=$(ls "$ROOTFS/boot/vmlinuz-"* 2>/dev/null | head -1)
+INITRD=$(ls "$ROOTFS/boot/initrd.img-"* 2>/dev/null | head -1)
 sudo cp "$KERNEL" "$WORK/iso/boot/vmlinuz"
 sudo cp "$INITRD" "$WORK/iso/boot/initrd.img"
 
@@ -223,31 +209,44 @@ menuentry "⭐ AstraOS Live — DesktopMode" {
   linux /boot/vmlinuz boot=live quiet splash
   initrd /boot/initrd.img
 }
-
 menuentry "🧑‍💻 AstraOS Live — DevMode" {
   linux /boot/vmlinuz boot=live quiet splash astra.mode=devmode
   initrd /boot/initrd.img
 }
-
 menuentry "🛡️ AstraOS Live — ShieldMode" {
   linux /boot/vmlinuz boot=live quiet splash astra.mode=shieldmode
   initrd /boot/initrd.img
 }
-
 menuentry "🔬 AstraOS Live — LabMode" {
   linux /boot/vmlinuz boot=live quiet splash astra.mode=labmode
   initrd /boot/initrd.img
 }
-
 menuentry "🔧 AstraOS — Safe Mode" {
   linux /boot/vmlinuz boot=live
   initrd /boot/initrd.img
 }
 GRUB
 
-echo "💿 Creating ISO..."
-sudo grub-mkrescue --compress=none -o output/astraos.iso "$WORK/iso"
-  --compress=xz
+echo "💿 Creating ISO with large file support..."
+sudo xorriso -as mkisofs \
+  -iso-level 3 \
+  -full-iso9660-filenames \
+  -volid "ASTRAOS" \
+  -eltorito-boot boot/grub/i386-pc/eltorito.img \
+  -no-emul-boot \
+  -boot-load-size 4 \
+  -boot-info-table \
+  --efi-boot boot/grub/efi.img \
+  -efi-boot-part \
+  --efi-startup-code \
+  --protective-msdos-label \
+  -o output/astraos.iso \
+  "$WORK/iso" || \
+sudo xorriso -as mkisofs \
+  -iso-level 3 \
+  -volid "ASTRAOS" \
+  -o output/astraos.iso \
+  "$WORK/iso"
 
 echo "✅ AstraOS v1.1.0 Build Complete!"
 ls -lh output/
