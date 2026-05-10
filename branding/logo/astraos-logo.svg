@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1"/>
+      <stop offset="60%" style="stop-color:#0066cc;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#000814;stop-opacity:1"/>
+    </radialGradient>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#0a0a2e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:1"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="250" cy="250" r="245" fill="url(#bgGrad)" stroke="#00d4ff" stroke-width="2"/>
+
+  <!-- Orbit rings -->
+  <ellipse cx="250" cy="250" rx="200" ry="60" fill="none" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.3" transform="rotate(-30 250 250)"/>
+  <ellipse cx="250" cy="250" rx="200" ry="60" fill="none" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.3" transform="rotate(30 250 250)"/>
+  <ellipse cx="250" cy="250" rx="200" ry="60" fill="none" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.3"/>
+
+  <!-- Center star -->
+  <polygon points="250,100 263,195 320,155 272,225 370,225 285,270 320,370 250,305 180,370 215,270 130,225 228,225 180,155 237,195"
+    fill="url(#starGlow)" filter="url(#glow)"/>
+
+  <!-- Small stars -->
+  <circle cx="80" cy="80" r="3" fill="#00d4ff" opacity="0.8"/>
+  <circle cx="420" cy="80" r="2" fill="#00d4ff" opacity="0.6"/>
+  <circle cx="100" cy="400" r="2" fill="#00d4ff" opacity="0.7"/>
+  <circle cx="400" cy="420" r="3" fill="#00d4ff" opacity="0.5"/>
+  <circle cx="150" cy="150" r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="350" cy="120" r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="380" cy="350" r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="120" cy="350" r="2" fill="#ffffff" opacity="0.5"/>
+
+  <!-- Text -->
+  <text x="250" y="440" text-anchor="middle"
+    font-family="monospace" font-size="42" font-weight="bold"
+    fill="#00d4ff" filter="url(#glow)" letter-spacing="8">
+    ASTRA
+  </text>
+  <text x="250" y="470" text-anchor="middle"
+    font-family="monospace" font-size="16"
+    fill="#ffffff" opacity="0.7" letter-spacing="12">
+    OPERATING SYSTEM
+  </text>
+</svg>

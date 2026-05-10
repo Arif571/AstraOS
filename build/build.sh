@@ -251,3 +251,16 @@ sudo xorriso -as mkisofs \
 echo "✅ AstraOS v1.1.0 Build Complete!"
 ls -lh output/
 sudo rm -rf "$WORK"
+
+# Tambahkan di bagian branding di build.sh
+echo "🎨 Installing custom branding assets..."
+sudo mkdir -p "$ROOTFS/usr/share/astraos/branding"
+sudo cp -r branding/* "$ROOTFS/usr/share/astraos/branding/"
+
+# Install wallpaper ke KDE
+sudo mkdir -p "$ROOTFS/usr/share/wallpapers/AstraOS"
+sudo cp branding/wallpaper/astraos-wallpaper.svg "$ROOTFS/usr/share/wallpapers/AstraOS/contents/images/wallpaper.svg"
+
+# Install SDDM theme
+sudo mkdir -p "$ROOTFS/usr/share/sddm/themes/astraos"
+sudo cp -r branding/sddm-theme/* "$ROOTFS/usr/share/sddm/themes/astraos/"
