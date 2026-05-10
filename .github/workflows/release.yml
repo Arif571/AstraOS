@@ -27,9 +27,7 @@ jobs:
             xorriso \
             grub-pc-bin \
             grub-efi-amd64-bin \
-            mtools \
-            isolinux \
-            syslinux-common
+            mtools
 
       - name: Build AstraOS ISO
         run: |
@@ -39,28 +37,52 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "⭐ AstraOS ${{ github.ref_name }}"
+          name: "⭐ AstraOS v1.0.0 Nova"
+          tag_name: v1.0.0
           body: |
-            ## ⭐ AstraOS ${{ github.ref_name }}
-            
+            ## ⭐ AstraOS v1.0.0 "Nova" — First Stable Release
+
             > *As high as stars, illuminating all users*
-            
-            ### 🆕 What's included
-            - 🖥️ KDE Plasma Desktop
-            - 🧑‍💻 DevMode — Development tools
-            - 🛡️ ShieldMode — Security tools  
-            - 🔬 LabMode — Data science tools
-            - ⚡ `astra switch --mode <name>` command
-            
-            ### 💾 Installation
+
+            ### 🖥️ Desktop
+            - KDE Plasma Desktop Environment
+            - SDDM Login Screen (custom AstraOS theme)
+            - Custom wallpaper & logo AstraOS
+            - Firefox ESR browser
+
+            ### 🧑‍💻 DevMode
+            - Python 3, Node.js, Go, Rust
+            - GCC, G++, Make, CMake
+            - Neovim, Tmux, Zsh, Git
+            - Docker
+
+            ### 🛡️ ShieldMode
+            - Nmap, Tcpdump, Netcat
+            - Tor, OpenVPN, Wireguard
+            - UFW, Fail2ban, ClamAV
+            - Proxychains4
+
+            ### 🔬 LabMode
+            - Python Data Stack (NumPy, Pandas, Matplotlib)
+            - Scikit-learn, Scipy, Seaborn
+            - SQLite3, Gnuplot
+
+            ### ⚡ AstraOS Features
+            - Switch mode: `astra switch --mode <name>`
+            - Built-in installer: `sudo astra-install`
+            - 4 GRUB boot modes
+            - Custom MOTD & branding
+
+            ### 💾 How to Install
             1. Download `astraos.iso`
-            2. Flash to USB: `dd if=astraos.iso of=/dev/sdX bs=4M`
-            3. Boot from USB
-            4. Run `sudo astra-install`
-            
+            2. Flash ke USB: `dd if=astraos.iso of=/dev/sdX bs=4M`
+            3. Boot dari USB
+            4. Jalankan `sudo astra-install`
+
             ### 🔑 Default credentials (Live mode)
             - Username: `astra`
             - Password: `astra`
+
           files: output/astraos.iso
           draft: false
           prerelease: false
